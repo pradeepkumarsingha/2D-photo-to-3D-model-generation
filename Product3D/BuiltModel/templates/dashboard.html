@@ -1,0 +1,123 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" /><title>Seller Studio · Product3D</title><link rel="stylesheet" href="{% static 'app.css' %}" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="{% url 'seller_dashboard' %}"><span class="brand-mark small">P3D</span> Product3D <span class="seller-label">SELLER STUDIO</span></a><div class="top-actions">
+        <span>{{ request.user.username }}</span><form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}<button class="button ghost">Sign out</button>
+        </form>
+      </div>
+    </header>
+    <main class="container">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">YOUR 3D COMMERCE WORKSPACE</p><h1>Bring your products<br /><span>into three dimensions.</span></h1><p class="muted">Add a product, upload one image, and let Tripo AI create its 3D model.</p>
+        </div>
+        <div class="hero-orb">
+          <div class="orb-inner">3D</div>
+        </div>
+      </section>
+      {% for message in messages %}
+        <div class="alert {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+      <section class="workspace">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">CREATE</p><h2>Add a product</h2>
+          </div><span class="step-pill">01 / PRODUCT SETUP</span>
+        </div>
+        <form method="post" enctype="multipart/form-data" id="product-form" class="create-grid">
+          {% csrf_token %}
+          <div class="form-fields">
+            <label>Product name<input name="name" placeholder="e.g. Minimal ceramic vase" maxlength="160" required /></label><label>
+              Category<select name="category">
+                <option value="other">Other</option>
+                <option value="electronics">Electronics</option>
+                <option value="fashion">Fashion</option>
+                <option value="home">Home & Living</option>
+                <option value="accessories">Accessories</option>
+              </select>
+            </label><label>Description <span class="optional">OPTIONAL</span><textarea name="description" rows="4" placeholder="A short description of your product..."></textarea></label><button class="button primary full" id="submit-btn">Save product & generate 3D <span>↗</span></button><p class="hint">Generation uses your Tripo API credits. Your API key stays on the server.</p>
+          </div>
+          <div class="upload-panel">
+            <label class="upload-zone" for="image-input" id="drop-zone"><input id="image-input" name="image" type="file" accept="image/png,image/jpeg,image/webp" required /><span class="upload-icon">＋</span><strong>Drop your product image here</strong><span class="muted">or click to browse</span><span class="file-spec">JPG · PNG · WEBP · MAX 20 MB</span><img id="image-preview" alt="Selected product preview" hidden /></label><div class="tip">
+              <strong>Image tip</strong><span>Use a clear, well-lit image with the entire product visible against a simple background.</span>
+            </div>
+          </div>
+        </form>
+      </section>
+      <section class="products-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">CATALOGUE</p><h2>My products <span class="count">{{ products|length }}</span></h2>
+          </div><span class="muted">Manage uploads and generated models</span>
+        </div>
+        {% if products %}
+          <div class="product-grid">
+            {% for product in products %}
+              <article class="product-card" data-product-id="{{ product.id }}">
+                <div class="product-image">
+                  {% if product.model_file %}
+                    <div class="model-ready">3D</div>
+                  {% endif %}
+                  {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" />
+                  {% else %}
+                    <div class="missing-image">No image</div>
+                  {% endif %}
+                </div>
+                <div class="product-card-body">
+                  <div class="product-title-row">
+                    <h3>{{ product.name }}</h3><span class="status status-{{ product.generations.first.status|default:'queued' }}" data-status>{{ product.generations.first.get_status_display|default:'Not generated' }}</span>
+                  </div>
+                  <p class="muted category-text">{{ product.get_category_display }}</p>
+                  <div class="progress-track">
+                    <span data-progress style="width:{{ product.generations.first.progress|default:0 }}%"></span>
+                  </div>
+                  <p class="progress-label" data-progress-label>{{ product.generations.first.progress|default:0 }}% complete</p>
+                  <div class="card-actions">
+                    {% if product.model_file %}
+                      <a class="button secondary" href="{% url 'product_detail' product.pk %}">View 3D model</a>
+                    {% else %}
+                      <button class="button secondary" type="button" data-refresh>Refresh status</button>
+                    {% endif %}
+                    {% if product.model_file and not product.is_published %}
+                      <button class="button ghost" type="button" data-publish>Publish</button>
+                    {% endif %}
+                    <span class="publish-state" data-published>
+                      {% if product.is_published %}
+                        Published
+                      {% else %}
+                        Draft
+                      {% endif %}
+                    </span>
+                  </div>
+                  <div class="card-actions secondary-actions">
+                    {% if product.image %}<button class="button ghost" type="button" data-regenerate>Regenerate</button>{% endif %}
+                    <button class="button ghost danger" type="button" data-delete>Delete</button>
+                  </div>
+                  <p class="error-text" data-error>
+                    {% if product.generations.first.status == 'failed' %}{{ product.generations.first.error_message }}{% endif %}
+                  </p>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-icon">◇</div><h3>Your product catalogue is empty</h3><p class="muted">Upload your first product image above to create its 3D model.</p>
+          </div>
+        {% endif %}
+      </section>
+      <footer>
+        PRODUCT3D <span>AI-POWERED PRODUCT VISUALIZATION</span>
+      </footer>
+    </main>
+    <script src="{% static 'dashboard.js' %}"></script>
+  </body>
+</html>

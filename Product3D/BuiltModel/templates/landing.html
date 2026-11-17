@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Product3D · The future of product discovery</title>
+  <link rel="stylesheet" href="{% static 'app.css' %}?v=2">
+</head>
+<body class="storefront">
+  <header class="site-nav">
+    <a class="brand" href="{% url 'home' %}"><span class="brand-mark small">P3D</span> Product3D</a>
+    <nav>
+      <a href="{% url 'explore' %}">Explore</a>
+      <a href="#how-it-works">How it works</a>
+      {% if request.user.is_authenticated %}
+        <a class="button primary nav-button" href="{% url 'seller_dashboard' %}">Seller studio</a>
+      {% else %}
+        <a class="button ghost nav-button" href="{% url 'login' %}">Seller login</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <main>
+    <section class="store-hero">
+      <div class="hero-copy">
+        <span class="hero-kicker">THE NEW STANDARD FOR DIGITAL COMMERCE</span>
+        <h1>Make every product<br><em>feel real.</em></h1>
+        <p>Turn a single product image into an immersive 3D experience customers can explore from every angle.</p>
+        <div class="hero-actions">
+          <a class="button primary large-button" href="{% url 'explore' %}">Explore the collection <span>↗</span></a>
+          <a class="text-link" href="{% url 'login' %}">Create your 3D catalogue <span>→</span></a>
+        </div>
+        <div class="trust-row"><span><strong>01</strong> Upload one image</span><span><strong>02</strong> Generate with AI</span><span><strong>03</strong> Sell in 3D</span></div>
+      </div>
+      <div class="hero-stage">
+        <div class="stage-glow"></div>
+        <div class="stage-card"><span class="stage-label">FEATURED MODEL</span><span class="stage-dot"></span><div id="hero-model"></div><div class="stage-footer"><span>Interactive preview</span><span>↗</span></div></div>
+      </div>
+    </section>
+
+    <section class="marquee"><span>DESIGNED FOR THE WAY PRODUCTS SHOULD BE EXPERIENCED</span><span>✦</span><span>ROTATE · ZOOM · DISCOVER</span><span>✦</span><span>DESIGNED FOR THE WAY PRODUCTS SHOULD BE EXPERIENCED</span></section>
+
+    <section class="store-section" id="how-it-works">
+      <div class="section-intro"><span class="hero-kicker">ONE SIMPLE WORKFLOW</span><h2>From flat image<br><em>to full dimension.</em></h2></div>
+      <div class="feature-grid">
+        <article><span class="feature-number">01</span><h3>Upload once</h3><p>Give your product a clear image. Product3D handles the rest from the seller studio.</p></article>
+        <article><span class="feature-number">02</span><h3>Generate in 3D</h3><p>Our AI builds a textured, presentation-ready model from your source image.</p></article>
+        <article><span class="feature-number">03</span><h3>Let them explore</h3><p>Share a product experience that is tactile, transparent and impossible to ignore.</p></article>
+      </div>
+    </section>
+
+    <section class="store-section collection-preview">
+      <div class="section-heading"><div><span class="hero-kicker">CURATED IN 3D</span><h2>Explore the collection</h2></div><a class="text-link" href="{% url 'explore' %}">View all models →</a></div>
+      <div class="mini-collection">
+        {% for product in products %}
+          <a class="mini-product" href="{% url 'product_detail' product.pk %}"><div class="mini-product-image">{% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">{% endif %}<span>3D</span></div><strong>{{ product.name }}</strong><small>{{ product.get_category_display }}</small></a>
+        {% empty %}
+          <a class="mini-product demo-product" href="{% url 'explore' %}"><div class="mini-product-image"><div class="demo-orb"></div><span>3D</span></div><strong>Objects, reimagined</strong><small>Explore the demo collection</small></a>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+  <footer class="store-footer"><span class="brand">P3D Product3D</span><span>AI-powered product visualization</span><a href="{% url 'login' %}">Seller studio →</a></footer>
+  <script type="module" src="{% static 'storefront.js' %}"></script>
+</body>
+</html>

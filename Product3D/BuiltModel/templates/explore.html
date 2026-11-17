@@ -1,0 +1,21 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Explore · Product3D</title><link rel="stylesheet" href="{% static 'app.css' %}?v=2"></head>
+<body class="storefront">
+  <header class="site-nav"><a class="brand" href="{% url 'home' %}"><span class="brand-mark small">P3D</span> Product3D</a><nav><a class="active" href="{% url 'explore' %}">Explore</a>{% if request.user.is_authenticated %}<a class="button primary nav-button" href="{% url 'seller_dashboard' %}">Seller studio</a>{% else %}<a class="button ghost nav-button" href="{% url 'login' %}">Seller login</a>{% endif %}</nav></header>
+  <main class="explore-page">
+    <section class="explore-heading"><span class="hero-kicker">THE OPEN SHOWROOM</span><h1>See products<br><em>in full dimension.</em></h1><p>Move through a collection of products built for curious customers. Drag to rotate, scroll to zoom.</p></section>
+    <section class="explore-grid">
+      {% for product in products %}
+        <article class="explore-card"><div class="explore-model" data-model-url="{% if product.model_file %}{{ product.model_file.url }}{% else %}https://threejs.org/examples/models/gltf/DamagedHelmet/glTF-Binary/DamagedHelmet.glb{% endif %}"><span class="model-loading">Loading model</span></div><div class="explore-card-info"><div><span class="hero-kicker">{{ product.get_category_display }}</span><h2>{{ product.name }}</h2></div><a href="{% url 'product_detail' product.pk %}" class="round-arrow">↗</a></div></article>
+      {% empty %}
+        <article class="explore-card demo-card"><div class="explore-model" data-model-url="https://threejs.org/examples/models/gltf/DamagedHelmet/glTF-Binary/DamagedHelmet.glb"><span class="model-loading">Loading model</span></div><div class="explore-card-info"><div><span class="hero-kicker">DEMO MODEL</span><h2>Objects, reimagined</h2></div><span class="round-arrow">✦</span></div></article>
+        <article class="explore-card demo-card"><div class="explore-model" data-model-url="https://threejs.org/examples/models/gltf/Flamingo.glb"><span class="model-loading">Loading model</span></div><div class="explore-card-info"><div><span class="hero-kicker">DEMO MODEL</span><h2>Made to be explored</h2></div><span class="round-arrow">✦</span></div></article>
+      {% endfor %}
+    </section>
+  </main>
+  <footer class="store-footer"><span class="brand">P3D Product3D</span><span>Every angle tells a story.</span><a href="{% url 'home' %}">Back home →</a></footer>
+  <script type="module" src="{% static 'storefront.js' %}"></script>
+</body>
+</html>

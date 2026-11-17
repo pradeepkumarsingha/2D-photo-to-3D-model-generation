@@ -1,0 +1,23 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" /><title>Sign in · Product3D</title><link rel="stylesheet" href="{% static 'app.css' %}" />
+  </head>
+  <body class="login-page">
+    <main class="login-card">
+      <div class="brand-mark">P3D</div>
+      <p class="eyebrow">SELLER WORKSPACE</p><h1>Welcome back</h1><p class="muted">Sign in to manage products and 3D models.</p>
+      {% for message in messages %}
+        <div class="alert">{{ message }}</div>
+      {% endfor %}
+      <form method="post">
+        {% csrf_token %}<label>Username<input name="username" required autocomplete="username" /></label><label>Password<input name="password" type="password" required autocomplete="current-password" /></label><button class="button primary full">Sign in</button>
+      </form>
+      <p class="hint">
+        Create a seller account using <code>python manage.py createsuperuser</code>.
+      </p>
+    </main>
+  </body>
+</html>
