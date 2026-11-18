@@ -8,6 +8,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter=("category","is_published","created_at")
     search_fields=("name","description","seller__username")
     inlines=[GenerationInline]
+    
 @admin.register(Generation)
 class GenerationAdmin(admin.ModelAdmin):
     list_display=("product","status","progress","task_id","created_at")

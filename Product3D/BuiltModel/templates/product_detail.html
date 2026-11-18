@@ -5,59 +5,183 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" /><title>{{ product.name }} · Product3D</title><link rel="stylesheet" href="{% static 'app.css' %}" />
   </head>
-  <body>
+  <body class="product-detail-page">
     <header class="topbar">
-      <a class="brand" href="{% url 'seller_dashboard' %}"><span class="brand-mark small">P3D</span> Product3D</a><a href="{% url 'seller_dashboard' %}" class="button ghost">← Dashboard</a>
+      {% if user.is_authenticated %}
+        <a class="brand" href="{% url 'seller_dashboard' %}"><span class="brand-mark small">P3D</span> Product3D</a>
+        <a href="{% url 'seller_dashboard' %}" class="button ghost">← Dashboard</a>
+      {% else %}
+        <a class="brand" href="{% url 'home' %}"><span class="brand-mark small">P3D</span> Product3D</a>
+        <a href="{% url 'explore' %}" class="button ghost">← Explore</a>
+      {% endif %}
     </header>
-    <main class="container viewer-page">
-      <p class="eyebrow">3D PRODUCT VIEWER</p><h1>{{ product.name }}</h1><p class="muted">{{ product.description }}</p>
-      <div id="viewer" class="viewer">
-        <div class="viewer-loading">Loading 3D model…</div>
-      </div>
-      <p class="hint">Drag to rotate · Scroll to zoom · Right-click to pan</p>
+    <main class="detail-layout">
+      <section class="detail-product-info">
+        <p class="eyebrow">3D PRODUCT VIEWER</p>
+        <h1>{{ product.name }}</h1>
+        <span class="detail-category">{{ product.get_category_display }}</span>
+        <p class="muted">{{ product.description|default:"Explore this product from every angle." }}</p>
+
+        <div class="detail-status">
+          {% if has_real_model %}
+            <span class="status-dot ready"></span>
+            <div><strong>Real 3D model</strong><small>Generated customer product</small></div>
+          {% else %}
+            <span class="status-dot demo"></span>
+            <div><strong>Demo preview</strong><small>Sample GLB — not a generated product</small></div>
+          {% endif %}
+        </div>
+
+        {% if product.image %}
+          <div class="detail-source-image">
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" />
+          </div>
+        {% endif %}
+      </section>
+
+      <section class="detail-viewer-panel">
+        <div class="viewer-toolbar">
+          <span class="viewer-label">INTERACTIVE VIEW</span>
+          <div class="viewer-controls">
+            <button type="button" id="rotateToggle" class="viewer-control active" title="Toggle auto-rotation">Rotate</button>
+            <button type="button" id="zoomOut" class="viewer-control" title="Zoom out">−</button>
+            <button type="button" id="resetView" class="viewer-control" title="Reset view">Reset</button>
+            <button type="button" id="zoomIn" class="viewer-control" title="Zoom in">+</button>
+            <button type="button" id="fullscreen" class="viewer-control" title="View fullscreen">Fullscreen</button>
+          </div>
+        </div>
+
+        <div id="viewer" class="viewer">
+          <div class="viewer-loading">
+            <span class="loading-ring"></span>
+            <strong>Loading 3D model</strong>
+            <small id="loadingProgress">0%</small>
+          </div>
+        </div>
+
+        <div class="viewer-footer">
+          <span class="hint">Drag to rotate · Scroll to zoom · Right-click to pan</span>
+          <span class="viewer-badge">360° Experience</span>
+        </div>
+      </section>
     </main>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+        }
+      }
+    </script>
     <script type="module">
-      import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js'
-      import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js'
-      import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js'
+      import * as THREE from 'three'
+      import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+      import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
       const host = document.querySelector('#viewer')
+      const loadingProgress = document.querySelector('#loadingProgress')
       const scene = new THREE.Scene()
-      scene.background = new THREE.Color(0xf2f5f9)
+      scene.background = new THREE.Color(0x10182b)
       const camera = new THREE.PerspectiveCamera(40, host.clientWidth / host.clientHeight, 0.1, 1000)
       camera.position.set(3, 2, 4)
-      const renderer = new THREE.WebGLRenderer({ antialias: true })
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
       renderer.setSize(host.clientWidth, host.clientHeight)
       renderer.setPixelRatio(Math.min(devicePixelRatio, 2))
       renderer.outputColorSpace = THREE.SRGBColorSpace
-      host.innerHTML = ''
+      renderer.toneMapping = THREE.ACESFilmicToneMapping
+      renderer.toneMappingExposure = 1.15
       host.appendChild(renderer.domElement)
-      scene.add(new THREE.HemisphereLight(0xffffff, 0x68758a, 2))
-      const light = new THREE.DirectionalLight(0xffffff, 2)
-      light.position.set(4, 6, 5)
-      scene.add(light)
+      scene.add(new THREE.HemisphereLight(0xffffff, 0x45577a, 2.2))
+      const keyLight = new THREE.DirectionalLight(0xffffff, 2.8)
+      keyLight.position.set(4, 6, 5)
+      scene.add(keyLight)
+      const blueLight = new THREE.PointLight(0x536dfe, 18, 20)
+      blueLight.position.set(-4, 2, -3)
+      scene.add(blueLight)
       const controls = new OrbitControls(camera, renderer.domElement)
       controls.enableDamping = true
+      controls.dampingFactor = 0.055
+      controls.autoRotate = true
+      controls.autoRotateSpeed = 0.8
+      controls.enablePan = true
+      controls.enableZoom = true
+
+      let defaultPosition = new THREE.Vector3(3, 2, 4)
+      let defaultTarget = new THREE.Vector3(0, 0, 0)
+      let modelRoot = null
+
+      function resetView() {
+        camera.position.copy(defaultPosition)
+        controls.target.copy(defaultTarget)
+        controls.update()
+      }
+
       new GLTFLoader().load(
         '{{ model_url|escapejs }}',
         (g) => {
-          scene.add(g.scene)
-          const box = new THREE.Box3().setFromObject(g.scene)
+          modelRoot = g.scene
+          scene.add(modelRoot)
+          const box = new THREE.Box3().setFromObject(modelRoot)
           const size = box.getSize(new THREE.Vector3())
           const center = box.getCenter(new THREE.Vector3())
-          g.scene.position.sub(center)
+          modelRoot.position.sub(center)
           const max = Math.max(size.x, size.y, size.z)
-          camera.position.set(max * 1.8, max * 1.2, max * 1.8)
+          defaultPosition = new THREE.Vector3(max * 1.8, max * 1.2, max * 1.8)
+          defaultTarget = new THREE.Vector3(0, 0, 0)
           camera.near = max / 100
           camera.far = max * 100
           camera.updateProjectionMatrix()
-          controls.target.set(0, 0, 0)
+          resetView()
+          modelRoot.traverse((child) => {
+            if (child.isMesh) {
+              child.castShadow = true
+              child.receiveShadow = true
+            }
+          })
+          host.querySelector('.viewer-loading')?.remove()
         },
-        undefined,
+        (event) => {
+          if (event.total) {
+            loadingProgress.textContent = `${Math.min(100, Math.round(event.loaded / event.total * 100))}%`
+          }
+        },
         (e) => {
-          host.innerHTML = '<p class="viewer-loading">Could not load the model. Check the GLB file.</p>'
+          host.querySelector('.viewer-loading')?.remove()
+          host.insertAdjacentHTML('beforeend', '<p class="viewer-error">Could not load this 3D model.</p>')
           console.error(e)
         }
       )
+
+      document.querySelector('#rotateToggle').addEventListener('click', (event) => {
+        controls.autoRotate = !controls.autoRotate
+        event.currentTarget.classList.toggle('active', controls.autoRotate)
+      })
+      document.querySelector('#resetView').addEventListener('click', resetView)
+      document.querySelector('#zoomIn').addEventListener('click', () => {
+        camera.position.multiplyScalar(0.82)
+        controls.update()
+      })
+      document.querySelector('#zoomOut').addEventListener('click', () => {
+        camera.position.multiplyScalar(1.18)
+        controls.update()
+      })
+      document.querySelector('#fullscreen').addEventListener('click', () => {
+        const panel = document.querySelector('.detail-viewer-panel')
+        if (!document.fullscreenElement) {
+          panel.requestFullscreen?.()
+        } else {
+          document.exitFullscreen?.()
+        }
+      })
+
+      document.addEventListener('fullscreenchange', () => {
+        setTimeout(() => {
+          const rect = host.getBoundingClientRect()
+          camera.aspect = rect.width / rect.height
+          camera.updateProjectionMatrix()
+          renderer.setSize(rect.width, rect.height)
+        }, 50)
+      })
+
       function animate() {
         requestAnimationFrame(animate)
         controls.update()

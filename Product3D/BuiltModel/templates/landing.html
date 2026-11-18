@@ -1,21 +1,16 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Product3D | Beyond the Ordinary</title>
     <meta name="description" content="Transform product images into immersive 3D shopping experiences with Product3D.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <link rel="stylesheet" href="{% static 'landing.css' %}">
+    <link rel="stylesheet" href="{% static 'landing.css' %}?v=5">
 
     <script type="importmap">
     {
@@ -27,410 +22,250 @@
     </script>
 </head>
 
-<body>
+<body class="landing-page">
+    <div class="background-grid" aria-hidden="true"></div>
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
 
-<!-- BACKGROUND -->
-<div class="background-grid"></div>
-<div class="ambient ambient-one"></div>
-<div class="ambient ambient-two"></div>
-
-<!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-dark custom-navbar">
-    <div class="container">
-
-        <a class="navbar-brand brand" href="/">
-            <span class="brand-icon">P3D</span>
-            <span>Product<span class="brand-blue">3D</span></span>
+    <header class="site-nav">
+        <a class="brand" href="{% url 'home' %}" aria-label="Product3D home">
+            <span class="brand-mark">P3D</span>
+            <span>Product<span class="brand-accent">3D</span></span>
         </a>
 
-        <button class="navbar-toggler" type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#mainNavbar">
-            <span class="navbar-toggler-icon"></span>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="mainNavigation" aria-label="Open navigation">
+            <span></span><span></span><span></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="mainNavbar">
+        <nav class="nav-actions" id="mainNavigation" aria-label="Main navigation">
+            <a href="{% url 'home' %}" class="active">Home</a>
+            <a href="{% url 'explore' %}">Explore</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#features">Features</a>
 
-            <ul class="navbar-nav mx-auto gap-lg-4">
-                <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="#explore">Explore</a></li>
-                <li class="nav-item"><a class="nav-link" href="#workflow">How it works</a></li>
-                <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
-            </ul>
+            {% if user.is_authenticated %}
+                <a href="{% url 'seller_dashboard' %}" class="nav-login">Studio</a>
+                <a href="{% url 'seller_dashboard' %}" class="nav-cta">Seller Studio <span>↗</span></a>
+            {% else %}
+                <a href="{% url 'login' %}" class="nav-login">Login</a>
+                <a href="{% url 'login' %}" class="nav-cta">Seller Studio <span>↗</span></a>
+            {% endif %}
+        </nav>
+    </header>
 
-            <div class="nav-actions">
-                <a href="/login/" class="login-link">Login</a>
-                <a href="/seller/" class="nav-cta">Seller Studio <span>↗</span></a>
-            </div>
-
-        </div>
-    </div>
-</nav>
-
-
-<!-- HERO SECTION -->
-<section class="hero-section" id="home">
-
-    <div class="container">
-        <div class="row align-items-center">
-
-            <div class="col-lg-6 hero-content">
-
-                <div class="hero-badge">
-                    <span class="pulse-dot"></span>
-                    THE FUTURE OF DIGITAL COMMERCE
-                </div>
+    <main>
+        <section class="hero-section" id="home">
+            <div class="hero-content">
+                <span class="hero-badge"><i></i>The Future of Digital Commerce</span>
 
                 <h1>
-                    Don't just<br>
-                    show products.<br>
-                    <span>Bring them</span><br>
-                    <span class="gradient-text">to life.</span>
+                    Don't just show products.<br>
+                    Bring them to<br>
+                    <span class="gradient-text">life.</span>
                 </h1>
 
                 <p class="hero-description">
-                    Transform ordinary product images into extraordinary
-                    interactive 3D experiences. Let your customers explore
-                    every detail, every angle, every possibility.
+                    Transform ordinary product images into extraordinary interactive 3D experiences.
+                    Let your customers explore every detail, every angle, every possibility.
                 </p>
 
-                <div class="hero-buttons">
-
-                    <a href="/seller/" class="primary-btn">
-                        Create your 3D product
-                        <span>↗</span>
-                    </a>
-
-                    <a href="#explore" class="secondary-btn">
-                        Explore experience ↓
-                    </a>
-
+                <div class="hero-actions">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'seller_dashboard' %}" class="button primary">Create Your 3D Product <span>↗</span></a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="button primary">Create Your 3D Product <span>↗</span></a>
+                    {% endif %}
+                    <a href="#featured" class="button secondary">Explore Experience <span>↓</span></a>
                 </div>
 
-                <div class="hero-process">
-                    <div><b>01</b><span>Upload image</span></div>
-                    <div class="process-line"></div>
-                    <div><b>02</b><span>Generate 3D</span></div>
-                    <div class="process-line"></div>
-                    <div><b>03</b><span>Showcase</span></div>
+                <div class="hero-workflow" aria-label="Three-step workflow">
+                    <div><strong>01</strong><span><i></i>Upload Image</span></div>
+                    <div><strong>02</strong><span><i></i>Generate 3D</span></div>
+                    <div><strong>03</strong><span><i></i>Showcase</span></div>
                 </div>
-
             </div>
 
+            
+<div class="hero-visual">
 
-            <!-- THREE JS SHOWCASE -->
-            <div class="col-lg-6">
+    <div class="hero-visual-header">
+        <span>Featured Experience</span>
 
-                <div class="showcase-wrapper">
-
-                    <div class="showcase-glow"></div>
-
-                    <div class="showcase-card">
-
-                        <div class="showcase-header">
-                            <div>
-                                <span class="small-label">FEATURED EXPERIENCE</span>
-                                <h6>Interactive 3D Showcase</h6>
-                            </div>
-
-                            <div class="live-status">
-                                <span></span> LIVE PREVIEW
-                            </div>
-                        </div>
-
-                        <div id="hero3DViewer" class="three-container">
-
-                            <div id="modelLoading" class="loading-model">
-                                <div class="loader-ring"></div>
-                                <span>Preparing 3D experience...</span>
-                            </div>
-
-                        </div>
-
-                        <div class="showcase-footer">
-
-                            <div>
-                                <span class="model-label">DEMO MODEL</span>
-                                <h5 id="modelName">Premium Audio System</h5>
-                                <p>Explore the product in 3D</p>
-                            </div>
-
-                            <span class="rotate-hint">↻ DRAG TO ROTATE</span>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="floating-card floating-top">
-                        <div class="floating-icon">✦</div>
-                        <div>
-                            <strong>360° View</strong>
-                            <span>Every angle matters</span>
-                        </div>
-                    </div>
-
-                    <div class="floating-card floating-bottom">
-                        <div class="floating-icon">◈</div>
-                        <div>
-                            <strong>Real-time 3D</strong>
-                            <span>Powered by Three.js</span>
-                        </div>
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
+        <span class="live-indicator">
+            <i></i> LIVE PREVIEW
+        </span>
     </div>
 
-</section>
-
-
-<!-- STATS -->
-<section class="stats-section">
-    <div class="container">
-        <div class="stats-grid">
-
-            <div class="stat-item">
-                <h3>360°</h3>
-                <p>Product exploration</p>
-            </div>
-
-            <div class="stat-item">
-                <h3>3D</h3>
-                <p>Immersive visualization</p>
-            </div>
-
-            <div class="stat-item">
-                <h3>AI</h3>
-                <p>Image-to-model workflow</p>
-            </div>
-
-            <div class="stat-item">
-                <h3>WEB</h3>
-                <p>Browser-based experience</p>
-            </div>
-
-        </div>
+    <div
+        class="hero-model"
+        data-model-url="https://threejs.org/examples/models/gltf/DamagedHelmet/glTF-Binary/DamagedHelmet.glb"
+    >
+        <span class="model-loading">Loading 3D model...</span>
     </div>
-</section>
 
+    <span class="model-badge-360">360° View</span>
+    <span class="model-badge-real">Real-time 3D</span>
 
-<!-- COLLECTION -->
-<section class="collection-section" id="explore">
+    <div class="hero-visual-footer">
+        <div>
+            <strong>3D Demo Product</strong>
+            <p>Interactive sample model powered by Three.js</p>
+        </div>
 
-    <div class="container">
+        <span>↻ DRAG TO ROTATE</span>
+    </div>
 
-        <div class="section-heading">
+</div>
+
+        </section>
+
+        <section class="features-section" id="features">
+            <div class="section-heading">
+                <span class="section-kicker">A NEW DIMENSION</span>
+                <h2>Built for modern product experiences.</h2>
+                <p>Everything you need to discover, create and present products in 3D.</p>
+            </div>
+
+            <div class="feature-grid">
+                <article class="feature-card">
+                    <div class="feature-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 8h8v8H8z"/></svg>
+                    </div>
+                    <span>01</span>
+                    <h3>Discover Products</h3>
+                    <p>Browse published products from different categories in one curated marketplace.</p>
+                </article>
+
+                <article class="feature-card featured">
+                    <div class="feature-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M12 3 21 8l-9 5-9-5 9-5Zm-9 9 9 5 9-5M3 16l9 5 9-5"/></svg>
+                    </div>
+                    <span>02</span>
+                    <h3>Interactive 3D Experience</h3>
+                    <p>Rotate, zoom and inspect products from every angle with smooth real-time controls.</p>
+                </article>
+
+                <article class="feature-card">
+                    <div class="feature-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="m12 2 1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Zm7 14 0.7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z"/></svg>
+                    </div>
+                    <span>03</span>
+                    <h3>AI-Powered 3D Generation</h3>
+                    <p>Transform uploaded product images into 3D models using the existing generation workflow.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="how-section" id="how-it-works">
+            <div class="section-heading">
+                <span class="section-kicker">HOW IT WORKS</span>
+                <h2>From one image to a 3D experience.</h2>
+                <p>A simple workflow for sellers and buyers.</p>
+            </div>
+
+            <div class="process-grid">
+                <article class="process-card">
+                    <span class="process-number">01</span>
+                    <div class="process-icon">↑</div>
+                    <h3>Upload Product Image</h3>
+                    <p>Add a clear product image to begin the reconstruction process.</p>
+                </article>
+
+                <article class="process-card">
+                    <span class="process-number">02</span>
+                    <div class="process-icon">3D</div>
+                    <h3>Generate 3D Model</h3>
+                    <p>Use the AI generation workflow to create an interactive model.</p>
+                </article>
+
+                <article class="process-card">
+                    <span class="process-number">03</span>
+                    <div class="process-icon">◇</div>
+                    <h3>Publish and Showcase</h3>
+                    <p>Publish the product and let customers explore every detail.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="featured-section" id="featured">
+            <div class="featured-heading">
+                <div>
+                    <span class="section-kicker">THE COLLECTION</span>
+                    <h2>Featured Products</h2>
+                    <p>Discover the latest published products.</p>
+                </div>
+                <a href="{% url 'explore' %}" class="text-link">View All Products <span>↗</span></a>
+            </div>
+
+            <div class="featured-grid">
+                {% for product in products %}
+                    <article class="featured-card">
+                        <a href="{% url 'product_detail' product.pk %}" class="featured-image">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
+                            {% else %}
+                                <div class="image-unavailable"><span>◇</span><p>Image unavailable</p></div>
+                            {% endif %}
+                            {% if product.model_file %}
+                                <span class="featured-ready"><i></i> 3D Ready</span>
+                            {% endif %}
+                        </a>
+
+                        <div class="featured-info">
+                            <span class="product-category">{{ product.get_category_display }}</span>
+                            <h3><a href="{% url 'product_detail' product.pk %}">{{ product.name }}</a></h3>
+                            <p>{{ product.description|default:"Discover this product and explore its details."|truncatewords:12 }}</p>
+                            <a href="{% url 'product_detail' product.pk %}" class="featured-link">View Product <span>↗</span></a>
+                        </div>
+                    </article>
+                {% empty %}
+                    <div class="featured-empty">
+                        <div class="empty-icon">◇</div>
+                        <h3>Products are coming soon</h3>
+                        <p>Published products will appear here. Visit Explore to discover the collection.</p>
+                        <a href="{% url 'explore' %}" class="button primary">Explore Products <span>↗</span></a>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="seller-banner">
+            <div class="seller-glow" aria-hidden="true"></div>
             <div>
-                <span class="section-label">EXPLORE THE POSSIBILITIES</span>
-                <h2>Products deserve<br><span>better perspectives.</span></h2>
+                <span class="section-kicker">FOR PRODUCT CREATORS</span>
+                <h2>Have a product? <span>Bring it into 3D.</span></h2>
+                <p>Join Product3D and give your products a more engaging digital presentation.</p>
             </div>
+            {% if user.is_authenticated %}
+                <a href="{% url 'seller_dashboard' %}" class="button primary">Start Selling <span>↗</span></a>
+            {% else %}
+                <a href="{% url 'login' %}" class="button primary">Start Selling <span>↗</span></a>
+            {% endif %}
+        </section>
+    </main>
 
-            <p>
-                Experience products in another dimension.
-                Explore the possibilities of interactive 3D commerce.
-            </p>
-        </div>
-
-
-        <div class="row g-4">
-
-            <div class="col-md-4">
-                <div class="category-card category-one">
-                    <span class="category-number">01 / TECHNOLOGY</span>
-                    <div class="category-art">◉</div>
-                    <div class="category-info">
-                        <h4>Electronics</h4>
-                        <p>Discover products in every detail.</p>
-                    </div>
-                    <span class="category-arrow">↗</span>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="category-card category-two">
-                    <span class="category-number">02 / DESIGN</span>
-                    <div class="category-art">◇</div>
-                    <div class="category-info">
-                        <h4>Fashion</h4>
-                        <p>Explore shape, texture and design.</p>
-                    </div>
-                    <span class="category-arrow">↗</span>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="category-card category-three">
-                    <span class="category-number">03 / LIFESTYLE</span>
-                    <div class="category-art">✧</div>
-                    <div class="category-info">
-                        <h4>Lifestyle</h4>
-                        <p>See the finer details differently.</p>
-                    </div>
-                    <span class="category-arrow">↗</span>
-                </div>
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- FEATURES -->
-<section class="features-section" id="features">
-
-    <div class="container">
-
-        <div class="section-heading centered">
-            <span class="section-label">WHY PRODUCT3D</span>
-            <h2>A smarter way to <span>experience commerce.</span></h2>
-            <p>Powerful technology meets beautiful product presentation.</p>
-        </div>
-
-
-        <div class="row g-4 mt-4">
-
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <div class="feature-icon">◈</div>
-                    <h4>Interactive 3D</h4>
-                    <p>Allow customers to rotate, zoom and explore products from every angle.</p>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <div class="feature-icon">✧</div>
-                    <h4>AI-powered generation</h4>
-                    <p>Transform product images into 3D models through AI-powered generation.</p>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h4>Web-based experience</h4>
-                    <p>Display 3D products directly in the browser without requiring additional software.</p>
-                </div>
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- WORKFLOW -->
-<section class="workflow-section" id="workflow">
-
-    <div class="container">
-
-        <div class="section-heading centered">
-            <span class="section-label">HOW IT WORKS</span>
-            <h2>Three steps. <span>One new dimension.</span></h2>
-            <p>From a simple image to an immersive product experience.</p>
-        </div>
-
-
-        <div class="workflow-track">
-
-            <div class="workflow-step">
-                <div class="workflow-number">01</div>
-                <div class="workflow-icon">↥</div>
-                <h4>Upload</h4>
-                <p>Upload your product image to begin.</p>
-            </div>
-
-            <div class="workflow-step">
-                <div class="workflow-number">02</div>
-                <div class="workflow-icon">✧</div>
-                <h4>Generate</h4>
-                <p>Generate a 3D model using AI.</p>
-            </div>
-
-            <div class="workflow-step">
-                <div class="workflow-number">03</div>
-                <div class="workflow-icon">◈</div>
-                <h4>Experience</h4>
-                <p>Preview and share your interactive model.</p>
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- CTA -->
-<section class="cta-section">
-
-    <div class="container">
-
-        <div class="cta-card">
-
-            <div class="cta-content">
-                <span class="section-label">YOUR NEXT DIMENSION STARTS HERE</span>
-
-                <h2>Your products deserve<br>more than a photograph.</h2>
-
-                <p>
-                    Start creating immersive 3D experiences
-                    and give your products a new identity.
-                </p>
-
-                <a href="/seller/" class="primary-btn cta-button">
-                    Enter Seller Studio ↗
-                </a>
-            </div>
-
-            <div class="cta-decoration">
-                <div class="cta-orbit orbit-one"></div>
-                <div class="cta-orbit orbit-two"></div>
-                <div class="cta-symbol">P3D</div>
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- FOOTER -->
-<footer class="footer">
-    <div class="container">
-
-        <div class="footer-main">
-
-            <a href="/" class="navbar-brand brand">
-                <span class="brand-icon">P3D</span>
-                <span>Product<span class="brand-blue">3D</span></span>
+    <footer class="store-footer">
+        <div class="footer-brand">
+            <a href="{% url 'home' %}" class="brand">
+                <span class="brand-mark">P3D</span>
+                <span>Product<span class="brand-accent">3D</span></span>
             </a>
-
-            <p>Making digital products feel real.</p>
-
-            <a href="/seller/" class="footer-link">Create your catalogue ↗</a>
-
+            <p>Transforming product discovery through immersive 3D experiences.</p>
         </div>
 
-        <div class="footer-bottom">
-            <span>© 2026 Product3D. All rights reserved.</span>
-            <span>Designed for the future of digital commerce.</span>
-        </div>
+        <nav class="footer-links" aria-label="Footer navigation">
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'explore' %}">Explore</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'seller_dashboard' %}">Seller Studio</a>
+            {% else %}
+                <a href="{% url 'login' %}">Seller Studio</a>
+            {% endif %}
+        </nav>
 
-    </div>
-</footer>
+        <p class="copyright">© {% now "Y" %} Product3D. All rights reserved.</p>
+    </footer>
 
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script type="module" src="{% static 'landing.js' %}"></script>
-
+    <script type="module" src="{% static 'storefront.js' %}?v=5"></script>
 </body>
 </html>

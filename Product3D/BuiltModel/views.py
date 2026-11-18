@@ -14,7 +14,7 @@ from django.db.models import Q
 
 
 def home(request):
-    products = Product.objects.filter(is_published=True)[:3]
+    products = Product.objects.filter(is_published=True).order_by("-created_at")[:3]
     return render(request, "landing.html", {"products": products})
 
 
@@ -227,13 +227,15 @@ def product_detail(request,pk):
         not request.user.is_authenticated or product.seller_id != request.user.id
     ):
         return HttpResponseForbidden("This product is not published.")
-    model_url = product.model_file.url if product.model_file else (
+    has_real_model = bool(product.model_file)
+    model_url = product.model_file.url if has_real_model else (
         "https://threejs.org/examples/models/gltf/DamagedHelmet/glTF-Binary/"
         "DamagedHelmet.glb"
     )
     return render(request, "product_detail.html", {
         "product": product,
         "model_url": model_url,
+        "has_real_model": has_real_model,
     })
 
 
