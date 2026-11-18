@@ -10,6 +10,8 @@ from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 from .models import Product, Generation
 from .services.tripo import TripoClient, TripoError
+from django.db.models import Q
+
 
 def home(request):
     products = Product.objects.filter(is_published=True)[:3]
@@ -31,36 +33,166 @@ def logout_view(request):
     if request.method=="POST": logout(request)
     return redirect("login")
 
+
 @login_required
 def seller_dashboard(request):
-    if request.method=="POST":
-        name=request.POST.get("name","").strip(); image=request.FILES.get("image")
+
+    # ==========================================
+    # 1. HANDLE PRODUCT CREATION
+    # ==========================================
+
+    if request.method == "POST":
+
+        name = request.POST.get("name", "").strip()
+        image = request.FILES.get("image")
+
         if not name or not image:
-            messages.error(request,"Product name and one product image are required."); return redirect("seller_dashboard")
-        if image.content_type not in ("image/jpeg", "image/png", "image/webp"):
-            messages.error(request,"Upload a JPG, PNG or WebP image."); return redirect("seller_dashboard")
-        if image.size>20*1024*1024:
-            messages.error(request,"Image must be 20 MB or smaller."); return redirect("seller_dashboard")
+            messages.error(
+                request,
+                "Product name and one product image are required."
+            )
+            return redirect("seller_dashboard")
+
+        # Validate image content type
+        if image.content_type not in (
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+        ):
+            messages.error(
+                request,
+                "Upload a JPG, PNG or WebP image."
+            )
+            return redirect("seller_dashboard")
+
+        # Validate image size (20 MB)
+        if image.size > 20 * 1024 * 1024:
+            messages.error(
+                request,
+                "Image must be 20 MB or smaller."
+            )
+            return redirect("seller_dashboard")
+
+        # Validate actual image content
         try:
             with Image.open(image) as uploaded_image:
-                if uploaded_image.format not in ("JPEG", "PNG", "WEBP"):
-                    raise ValidationError("Upload a JPG, PNG or WebP image.")
+
+                if uploaded_image.format not in (
+                    "JPEG",
+                    "PNG",
+                    "WEBP"
+                ):
+                    raise ValidationError(
+                        "Upload a JPG, PNG or WebP image."
+                    )
+
                 uploaded_image.verify()
+
             image.seek(0)
-        except (UnidentifiedImageError, OSError, ValidationError):
-            messages.error(request, "The uploaded file is not a valid image."); return redirect("seller_dashboard")
-        product=Product.objects.create(seller=request.user,name=name,category=request.POST.get("category","other"),description=request.POST.get("description",""),image=image)
-        generation=Generation.objects.create(product=product)
+
+        except (
+            UnidentifiedImageError,
+            OSError,
+            ValidationError
+        ):
+            messages.error(
+                request,
+                "The uploaded file is not a valid image."
+            )
+            return redirect("seller_dashboard")
+
+        # ======================================
+        # 2. SAVE PRODUCT
+        # ======================================
+
+        product = Product.objects.create(
+            seller=request.user,
+            name=name,
+            category=request.POST.get("category", "other"),
+            description=request.POST.get("description", ""),
+            image=image
+        )
+
+        generation = Generation.objects.create(
+            product=product
+        )
+
+        # ======================================
+        # 3. START TRIPO AI GENERATION
+        # ======================================
+
         try:
-            client=TripoClient(); token=client.upload_image(product.image); task_id=client.create_image_task(token)
-            generation.task_id=task_id; generation.status="queued"; generation.save(update_fields=["task_id","status"])
-            messages.success(request,"Product saved. 3D generation has started.")
+
+            client = TripoClient()
+
+            token = client.upload_image(product.image)
+
+            task_id = client.create_image_task(token)
+
+            generation.task_id = task_id
+            generation.status = "queued"
+
+            generation.save(
+                update_fields=["task_id", "status"]
+            )
+
+            messages.success(
+                request,
+                "Product saved. 3D generation has started."
+            )
+
         except (TripoError, OSError) as exc:
-            generation.status="failed"; generation.error_message=str(exc); generation.completed_at=timezone.now(); generation.save()
-            messages.error(request,f"Product saved, but generation could not start: {exc}")
+
+            generation.status = "failed"
+            generation.error_message = str(exc)
+            generation.completed_at = timezone.now()
+
+            generation.save()
+
+            messages.error(
+                request,
+                f"Product saved, but generation could not start: {exc}"
+            )
+
+        # Always redirect after POST
         return redirect("seller_dashboard")
-    products=Product.objects.filter(seller=request.user).prefetch_related("generations")
-    return render(request,"dashboard.html",{"products":products})
+
+    # ==========================================
+    # 4. FETCH SELLER PRODUCTS
+    # ==========================================
+
+    products = Product.objects.filter(
+        seller=request.user
+    ).prefetch_related("generations")
+
+    # ==========================================
+    # 5. CALCULATE DASHBOARD STATISTICS
+    # ==========================================
+
+    ready_count = products.filter(
+        model_file__gt=""
+    ).count()
+
+    published_count = products.filter(
+        is_published=True
+    ).count()
+
+    pending_count = Generation.objects.filter(
+        product__seller=request.user,
+        status__in=["queued", "running"]
+    ).count()
+
+    # ==========================================
+    # 6. RENDER SELLER DASHBOARD
+    # ==========================================
+
+    return render(request, "dashboard.html", {
+        "products": products,
+        "ready_count": ready_count,
+        "published_count": published_count,
+        "pending_count": pending_count,
+    })
+
 
 @login_required
 @require_GET

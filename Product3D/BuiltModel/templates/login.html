@@ -1,23 +1,237 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" /><title>Sign in · Product3D</title><link rel="stylesheet" href="{% static 'app.css' %}" />
-  </head>
-  <body class="login-page">
-    <main class="login-card">
-      <div class="brand-mark">P3D</div>
-      <p class="eyebrow">SELLER WORKSPACE</p><h1>Welcome back</h1><p class="muted">Sign in to manage products and 3D models.</p>
-      {% for message in messages %}
-        <div class="alert">{{ message }}</div>
-      {% endfor %}
-      <form method="post">
-        {% csrf_token %}<label>Username<input name="username" required autocomplete="username" /></label><label>Password<input name="password" type="password" required autocomplete="current-password" /></label><button class="button primary full">Sign in</button>
-      </form>
-      <p class="hint">
-        Create a seller account using <code>python manage.py createsuperuser</code>.
-      </p>
-    </main>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sign in | Product3D</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'auth.css' %}">
+</head>
+
+<body class="auth-page">
+
+<div class="auth-background"></div>
+
+<a href="/" class="auth-brand">
+    <span class="brand-icon">P3D</span>
+    <span>Product<span>3D</span></span>
+</a>
+
+<main class="auth-layout">
+
+    <!-- LEFT SIDE -->
+    <section class="auth-showcase">
+
+        <div class="showcase-content">
+
+            <div class="auth-eyebrow">
+                <span class="pulse-dot"></span>
+                THE FUTURE OF DIGITAL COMMERCE
+            </div>
+
+            <h1>
+                Your products.<br>
+                Your vision.<br>
+                <span>Your dimension.</span>
+            </h1>
+
+            <p>
+                Enter your creative workspace and transform
+                ordinary product images into extraordinary
+                3D experiences.
+            </p>
+
+            <div class="auth-visual">
+
+                <div class="visual-orbit orbit-a"></div>
+                <div class="visual-orbit orbit-b"></div>
+
+                <div class="visual-model">
+                    <div class="visual-model-inner">P3D</div>
+                </div>
+
+                <div class="visual-tag">
+                    <span>✦</span>
+                    Interactive 3D Commerce
+                </div>
+
+            </div>
+
+            <div class="auth-benefits">
+                <div>
+                    <span>01</span>
+                    <strong>Upload products</strong>
+                </div>
+
+                <div>
+                    <span>02</span>
+                    <strong>Generate 3D models</strong>
+                </div>
+
+                <div>
+                    <span>03</span>
+                    <strong>Manage your catalogue</strong>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- RIGHT SIDE -->
+    <section class="auth-form-section">
+
+        <div class="auth-card">
+
+            <div class="mobile-brand">
+                <span class="brand-icon">P3D</span>
+                Product3D
+            </div>
+
+            <div class="form-heading">
+
+                <span class="section-label">SELLER WORKSPACE</span>
+
+                <h2>Welcome back.</h2>
+
+                <p>
+                    Sign in to manage your products
+                    and interactive 3D models.
+                </p>
+
+            </div>
+
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="auth-alert {{ message.tags }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+
+            <form method="post" class="auth-form" id="login-form">
+
+                {% csrf_token %}
+
+                <label for="username">Username</label>
+
+                <div class="input-wrapper">
+                    <span class="input-icon">♙</span>
+
+                    <input
+                        id="username"
+                        name="username"
+                        type="text"
+                        placeholder="Enter your username"
+                        required
+                        autocomplete="username"
+                        autofocus
+                    >
+                </div>
+
+
+                <div class="password-heading">
+                    <label for="password">Password</label>
+                </div>
+
+                <div class="input-wrapper">
+                    <span class="input-icon">♙</span>
+
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        placeholder="Enter your password"
+                        required
+                        autocomplete="current-password"
+                    >
+
+                    <button
+                        type="button"
+                        class="password-toggle"
+                        id="togglePassword"
+                        aria-label="Show password"
+                    >
+                        Show
+                    </button>
+                </div>
+
+
+                <div class="form-options">
+                    <label class="remember-option">
+                        <input type="checkbox" name="remember">
+                        <span>Remember me</span>
+                    </label>
+                </div>
+
+
+                <button type="submit" class="auth-submit">
+                    Sign in to your workspace
+                    <span>↗</span>
+                </button>
+
+            </form>
+
+
+            <div class="auth-divider">
+                <span>SECURE SELLER ACCESS</span>
+            </div>
+
+            <div class="auth-info">
+                <span class="secure-icon">✓</span>
+
+                <p>
+                    Your account and product data are protected
+                    by secure server-side authentication.
+                </p>
+            </div>
+
+            <div class="account-hint">
+                <span>New to Product3D?</span>
+
+                <p>
+                    Create a seller account using
+                    <code>python manage.py createsuperuser</code>.
+                </p>
+            </div>
+
+            <a href="/" class="back-home">← Back to homepage</a>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+    const passwordInput = document.getElementById("password");
+    const togglePassword = document.getElementById("togglePassword");
+
+    togglePassword.addEventListener("click", () => {
+
+        const isPassword = passwordInput.type === "password";
+
+        passwordInput.type = isPassword ? "text" : "password";
+
+        togglePassword.textContent = isPassword ? "Hide" : "Show";
+
+        togglePassword.setAttribute(
+            "aria-label",
+            isPassword ? "Hide password" : "Show password"
+        );
+
+    });
+</script>
+
+</body>
 </html>
